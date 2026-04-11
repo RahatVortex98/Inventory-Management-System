@@ -41,7 +41,7 @@ php artisan make:migration add_role_to_users --table users
 and add this to that new database:
 
 ```
-  $table->string('role')->after('name')->default('user');
+$table->string('role')->after('name')->default('user');
 ```
  
 and then,
@@ -53,11 +53,45 @@ php artisan migrate
 # Separate Admin and user dashboard:
 resource ->admin(folder)->admin_dashboard.blade.php
 
+- Create Middleware
+Generate a middleware to check if the user is an admin:
 
+```
+php artisan make:middleware AdminMiddleware
+```
+- In app/Http/Middleware/AdminMiddleware.php:
 
+```
+public function handle(Request $request, Closure $next) {
+    if (auth()->check() && auth()->user()->role === 'admin') {
+        return $next($request);
+    }
+    return redirect('/dashboard'); // Send normal users away
+}
+```
+- Separate Routes:
+Organize your routes/web.php so the URLs and logic are totally distinct:
+```
+// User Dashboard (Normal Customers/Staff)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+});
 
+// Admin Dashboard (Management Only)
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::resource('products', ProductController::class); // Only admin can CRUD products
+});
 
-
+```
+- bootstrap/app.php:
+```
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->alias([
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+    ]);
+})
+```
 
 
 
