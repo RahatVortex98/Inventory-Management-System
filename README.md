@@ -92,8 +92,89 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     ]);
 })
 ```
+- UserDashboarController:
+  
+```
+<?php
 
+namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; 
+class UserDashboardController extends Controller
+{
+   public function index()
+    {
+        // Check if user is logged in first to avoid errors
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return view('admin.admin_dashboard'); 
+        }
+
+        return view('user.dashboard'); 
+    }
+}
+
+```
+# 403 abort message:
+
+- UserDashboardController:
+```
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; 
+class UserDashboardController extends Controller
+{
+   public function index()
+    {
+        // Check if user is logged in first to avoid errors
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return view('admin.admin_dashboard'); 
+        }
+        else if (Auth::check() && Auth::user()->role === 'user') {
+            return view('user.dashboard'); 
+        }
+        else{
+            abort(403);
+        // return view('user.dashboard'); 
+        }
+    }
+}
+
+```
+- AdminMiddleware:
+```
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
+class AdminMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  Closure(Request): (Response)  $next
+     */
+    
+   public function handle($request, Closure $next)
+{
+    
+    if ($request->user() && $request->user()->role === 'admin') {
+        return $next($request);
+    }
+
+    abort(403, 'You do not have administrative privileges to access this page.');
+}
+}
+
+```
+and add a file under view->errors->403.blade.php
 
 
 
