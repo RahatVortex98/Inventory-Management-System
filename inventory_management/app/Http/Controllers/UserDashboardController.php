@@ -12,7 +12,12 @@ class UserDashboardController extends Controller
         if (Auth::check() && Auth::user()->role === 'admin') {
             return view('admin.admin_dashboard'); 
         }
-
-        return view('user.dashboard'); 
+        else if (Auth::check() && Auth::user()->role === 'user') {
+            return view('user.dashboard'); 
+        }
+        else{
+            abort(403);
+        // return view('user.dashboard'); 
+        }
     }
 }

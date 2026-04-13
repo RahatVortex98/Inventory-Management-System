@@ -21,6 +21,6 @@ class AdminMiddleware
         return $next($request);
     }
 
-    return redirect('/dashboard');
+    abort(403, 'You do not have administrative privileges to access this page.');
 }
 }
