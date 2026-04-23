@@ -178,4 +178,17 @@ and add a file under view->errors->403.blade.php
 
 
 
+### Category :
 
+for making a table (migration):
+
+Model: where we mentioned which column will be used and the relationship with the other model.
+Migration table: what the database will look like.
+```
+php artisan make:model Category -m
+```
+after this ->
+
+```
+php artisan migrate
+```
